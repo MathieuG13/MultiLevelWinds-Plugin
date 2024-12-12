@@ -1,7 +1,6 @@
 package net.sf.openrocket.example;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import net.sf.openrocket.models.wind.WindModel;
 import net.sf.openrocket.simulation.SimulationConditions;
@@ -24,7 +23,7 @@ import net.sf.openrocket.util.BugException;
  * file storage will work automatically.
  */
 public class MultiLevelWind extends AbstractSimulationExtension {
-	
+
 	@Override
 	public String getName() {
 		String label = "Multi Level Wind";
@@ -44,9 +43,8 @@ public class MultiLevelWind extends AbstractSimulationExtension {
 	private String getWindLabel(int idx) {
 		return String.format("%d%d\u00B0%d\u1d50\u1d56\u02b0",
 				Math.round(getWindAlt(idx) / 0.3048),
-				Math.round(360.0 * getWindDirection(idx) / (Math.PI * 2)),
+				Math.round(360.0 * getWindDirection(idx) / (Math.PI * 2*3)),
 				Math.round(getWind(idx) / 0.44704));
-				//new DegreeUnit().toString(getWindDirection(idx)));
 	}
 	
 	@Override
@@ -62,10 +60,7 @@ public class MultiLevelWind extends AbstractSimulationExtension {
 	
 	@Override
 	public void initialize(SimulationConditions conditions) throws SimulationException {
-		//conditions.getSimulationListenerList().add(new MultiLevelWindSimulationListener(getMultiplier()));
 		List<MultiLevelWindModel.WindSpecs> windSpecs = new ArrayList<MultiLevelWindModel.WindSpecs>();
-		//windSpecs.add(new MultiLevelWindModel.WindSpecs(getWindZeroAlt(),  getWindZero(),  Math.PI / 2));
-		//windSpecs.add(new MultiLevelWindModel.WindSpecs(200,  20,  Math.PI / 2));
 		for (int i = 0; i < NUM_LEVELS; i++) {
 			windSpecs.add(new MultiLevelWindModel.WindSpecs(getWindAlt(i),  getWind(i),  getWindDirection(i)));
 		}
@@ -125,7 +120,7 @@ public class MultiLevelWind extends AbstractSimulationExtension {
 		return config.getDouble(getConfigKeyPrefix(idx), globalWindSpeed);
 	}
 	
-	private void setWind(int idx, double value) {
+	public void setWind(int idx, double value) {
 		for (int i = idx + 1; i < NUM_LEVELS; i++) {
 			if (getWindAlt(i) == getWindAlt(idx) || getWind(i) == getWind(idx)) {
 				config.put(getConfigKeyPrefix(i), value);
@@ -144,46 +139,46 @@ public class MultiLevelWind extends AbstractSimulationExtension {
 			defaultVal = 0.0;
 			break;
 		case 1:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("1000ft");
-			break;
-		case 2:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("2000ft");
-			break;
-		case 3:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("2500ft");
-			break;
-		case 4:
 			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("3000ft");
 			break;
+		case 2:
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("6000ft");
+			break;
+		case 3:
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("9000ft");
+			break;
+		case 4:
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("12000ft");
+			break;
 		case 5:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("5000ft");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("18000ft");
 			break;
 		case 6:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("6400ft");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("24000ft");
 			break;
 		case 7:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("9842ft");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("30000ft");
 			break;
 		case 8:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("4200m");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("34000ft");
 			break;
 		case 9:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("5500m");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("39000ft");
 			break;
 		case 10:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("7000m");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("45000ft");
 			break;
 		case 11:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("9000m");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("53000ft");
 			break;
 		case 12:
-			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("10000m");
+			defaultVal = UnitGroup.UNITS_DISTANCE.fromString("80000ft");
 			break;
 		}
 		return config.getDouble(getConfigKeyPrefix(idx) + "_alt", defaultVal);
 	}
 	
-	private void setWindAlt(int idx, double value) {
+	public void setWindAlt(int idx, double value) {
 		config.put(getConfigKeyPrefix(idx) + "_alt", value);
 		for (int i = 0; i < NUM_LEVELS; i++) {
 			if (i < idx) {
@@ -200,11 +195,10 @@ public class MultiLevelWind extends AbstractSimulationExtension {
 	}
 	
 	private double getWindDirection(int idx) {
-		//return Math.PI / 2;
 		return config.getDouble(getConfigKeyPrefix(idx) + "_direction", globalWindDirection);
 	}
 	
-	private void setWindDirection(int idx, double value) {
+	public void setWindDirection(int idx, double value) {
 		double currValue = getWindDirection(idx);
 		for (int i = idx; i < NUM_LEVELS; i++) {
 			if (getWindDirection(i) == currValue) {
