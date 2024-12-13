@@ -178,19 +178,26 @@ public class MultiLevelWindConfigurator extends AbstractSwingSimulationExtension
 		try {
 			FileReader reader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(reader);
-
+	
 			try {
-				// Read file content
+				// Parse JSON using Gson
 				Gson gson = new Gson();
-				Map<String, Object> data = gson.fromJson(reader, new TypeToken<Map<String, Object>>() {
-				}.getType());
-				List<Map<String, Double>> Content = (List<Map<String, Double>>) data.get(SelectedClass);
-				return Content;
+				List<Map<String, Object>> dataList = gson.fromJson(reader, new TypeToken<List<Map<String, Object>>>() {}.getType());
+	
+				// Loop through the list to find the selected class (AM or PM)
+				for (Map<String, Object> data : dataList) {
+					if (data.containsKey(SelectedClass)) {
+						// Extract the corresponding list (AM or PM)
+						List<Map<String, Double>> content = (List<Map<String, Double>>) data.get(SelectedClass);
+						bufferedReader.close(); // Close the reader before returning
+						return content;
+					}
+				}
 			} catch (Exception e) {
 				// Handle improper file data
 				System.err.println("Error reading file: " + e.getMessage());
 			}
-
+	
 			// Close the reader
 			bufferedReader.close();
 		} catch (FileNotFoundException e) {
